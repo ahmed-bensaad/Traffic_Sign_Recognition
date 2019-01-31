@@ -5,6 +5,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import numpy as np
 from sklearn.metrics import precision_score
 from rampwf.score_types.classifier_base import ClassifierBaseScoreType
+from sklearn.model_selection import train_test_split
 
 
 problem_title = 'Traffic Signs Recognition'
@@ -42,6 +43,14 @@ score_types = [
 
 ]
 
+def get_samples(data, n=50):
+    n_classes = len(data['ClassId'].unique())
+    df = pd.DataFrame(columns=['Filename'])
+    for c in range(n_classes):
+        df = df.append(data[data['ClassId']==c].sample(n=n))
+    df = df.reset_index()
+    return df['Filename'],df['ClassId']
+
 def get_cv(X, y):
     cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=57)
     return cv.split(X, y)
@@ -66,17 +75,17 @@ def _read_data(path, typ):
                                  '{}.csv'.format(typ))
 
         data = pd.read_csv(data_path)
+        
     except IOError:
         raise IOError("'data/{0}.csv' is not "
                       "found. Run annotations_gen.py to get annotations".format(typ))
 
     X = data['Filename']
     Y = data['ClassId']
-
     if test:
         # return src, y
-        X1,X2,Y1,Y2 = train_test_split(X,Y, X.shape[0]-100)
-        return X2,Y2
+        X, Y = get_samples(data,n=20)
+        return X,Y
     else:
         return X, Y
 
@@ -87,4 +96,6 @@ def get_test_data(path='.'):
 
 def get_train_data(path='.'):
     return _read_data(path, 'Train')
+
+
 
