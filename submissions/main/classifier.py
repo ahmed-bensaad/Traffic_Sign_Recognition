@@ -9,6 +9,8 @@ from keras.optimizers import Adam
 import functools
 import tensorflow as tf
 import cv2 
+from keras.optimizers import SGD
+from keras.callbacks import ModelCheckpoint,ReduceLROnPlateau, Callback, LearningRateScheduler
 
 
 class Classifier(BaseEstimator):
@@ -20,7 +22,6 @@ class Classifier(BaseEstimator):
         self.model = create_model()
 
     def fit(self, X, y):
-
         X_train, X_val, y_train, y_val = train_test_split(X,y, test_size=0.2)
         ntrain_samples = X_train.shape[0]
         nval_samples = X_val.shape[0]
@@ -30,14 +31,13 @@ class Classifier(BaseEstimator):
 
         callbacks_list = []
         callbacks_list.append(ReduceLROnPlateau(monitor='val_loss', factor=0.5,
-                                        patience=5, epsilon=0.001,
+                                        patience=5, min_delta=0.001,
                                         cooldown=2, verbose=1))
-
 
         self.model.fit_generator(train_generator(X_train ,y_train,self.batch_size),
                                 steps_per_epoch=steps_per_epoch, epochs = self.epochs, 
                                 validation_data =val_generator(X_val ,y_val,self.batch_size),
-                                 validation_steps = validation_steps
+                                 validation_steps = validation_steps,
                                   callbacks = callbacks_list )
         
 
@@ -121,6 +121,7 @@ def val_generator(anns_x, anns_y, batch_size = 100, target_size = (128,128), cla
           X_batch = [img for img in imgs_resized]
           Y_batch = anns_y.iloc[i:i+batch_size]
           yield np.array(X_batch), to_categorical(np.array(Y_batch),num_classes=43)
+
 
 ########################## Data Augmentation ##################################
 def augment_brightness_camera_images(image):
