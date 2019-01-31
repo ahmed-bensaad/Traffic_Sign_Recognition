@@ -25,7 +25,7 @@ Authors : Ahmed Ben Saad, Taha Halal, Yacine Ben Baccar
   
   ### Notebook
   
-  Follow the provided in the jupyter notebook for some insights
+  Follow the guide provided in the jupyter notebook for some insights
   
   
   ### Dataset : The German Traffic Sign Recognition Benchmark  (GTSRB)
